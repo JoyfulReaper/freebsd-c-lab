@@ -75,7 +75,15 @@ int main (int argc, char *argv[])
 
         if(bytes_written != bytes_read)
         {
-            perror("Error writing to dest");
+            if(ferror(dest))
+            {
+                perror("Error writing to dest");
+            }
+            else
+            {
+                fprintf(stderr, "Short write to destination\n");
+            }
+            
             fclose(src);
             fclose(dest);
             return EXIT_FAILURE;
