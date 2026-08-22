@@ -1,0 +1,1 @@
+cc -Wall -Wextra -Wpedantic -g -o ${fileBasenameNoExtension} ${fileBasename}
