@@ -1,9 +1,12 @@
-#include <stdio.h>
+#include <errno.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
-bool verifyArguments(int argc, char *argv[])
+bool verify_arguments(int argc, char *argv[])
 {
-    if(argc != 3)
+    if (argc != 3)
     {
         fprintf(stderr, "Usage: %s <source> <dest>\n", argv[0]);
         return false;
@@ -12,59 +15,97 @@ bool verifyArguments(int argc, char *argv[])
     return true;
 }
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    if(!verifyArguments(argc, argv))
+    if (!verify_arguments(argc, argv))
     {
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    FILE* src;
-    FILE* dest;
+    FILE *src;
+    FILE *dest;
     unsigned char buffer[4096];
     size_t bytes_read;
 
     src = fopen(argv[1], "rb");
-    dest = fopen(argv[2], "wb");
-
-    if(src == NULL)
+    if (src == NULL)
     {
         perror("Error opening source file");
-        return 1;
+        return EXIT_FAILURE;
     }
 
+    struct stat src_stat;
+    struct stat dest_stat;
+
+    if (fstat(fileno(src), &src_stat) == -1)
+    {
+        perror("fstat source");
+        fclose(src);
+        return EXIT_FAILURE;
+    }
+
+    if (stat(argv[2], &dest_stat) == 0)
+    {
+        if (src_stat.st_dev == dest_stat.st_dev && src_stat.st_ino == dest_stat.st_ino)
+        {
+            fprintf(stderr, "Source and destination are the same file\n");
+            fclose(src);
+            return EXIT_FAILURE;
+        }
+    }
+    else if (errno != ENOENT)
+    {
+        perror("stat destination");
+        fclose(src);
+        return EXIT_FAILURE;
+    }
+
+    dest = fopen(argv[2], "wb");
     if (dest == NULL)
     {
         perror("Error opening dest file");
         fclose(src);
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    while((bytes_read = fread(buffer, 1, sizeof buffer, src)) > 0)
+    while ((bytes_read = fread(buffer, 1, sizeof buffer, src)) > 0)
     {
-        fwrite(buffer,1,bytes_read, dest);
-        if(ferror(dest))
+        size_t bytes_written = fwrite(buffer, 1, bytes_read, dest);
+
+        if (bytes_written != bytes_read)
         {
-            perror("Error writing to dest");
+            if (ferror(dest))
+            {
+                perror("Error writing to dest");
+            }
+            else
+            {
+                fprintf(stderr, "Short write to destination\n");
+            }
+
             fclose(src);
             fclose(dest);
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
-    if(ferror(src))
+    if (ferror(src))
     {
         perror("Error reading src");
         fclose(src);
         fclose(dest);
 
-        return 1;
+        return EXIT_FAILURE;
     }
 
     fclose(src);
-    fclose(dest);
+    if (fclose(dest) == EOF)
+    {
+        perror("Error closing destination");
+        return EXIT_FAILURE;
+    }
 
-    printf("File copied!\n");
+    puts("File copied!");
 
-    return 0;
+    return EXIT_SUCCESS;
 }
