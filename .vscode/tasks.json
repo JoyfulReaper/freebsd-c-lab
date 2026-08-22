@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "FreeBSD: Build and Run",
+            "type": "process",
+            "command": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "if ('${fileExtname}' -ne '.c') { Write-Error 'Open a .c file before building.'; exit 1 }; & 'C:\\Windows\\System32\\OpenSSH\\scp.exe' '${file}' 'freebsd-dev:~/src/learn-c/${fileBasename}'; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & 'C:\\Windows\\System32\\OpenSSH\\ssh.exe' freebsd-dev 'cd ~/src/learn-c && cc -Wall -Wextra -Wpedantic -g -o ${fileBasenameNoExtension} ${fileBasename} && ./${fileBasenameNoExtension}'"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        }
+    ]
+}
