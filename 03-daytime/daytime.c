@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
     for (rp = result; rp != NULL; rp = rp->ai_next)
     {
         sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if(sfd == -1)
+        if (sfd == -1)
             continue;
 
-        if(connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
+        if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
         {
             break;
         }
@@ -36,13 +36,27 @@ int main(int argc, char *argv[])
         close(sfd);
     }
 
+    if (rp == NULL)
+    {
+        fprintf(stderr, "failed to connect\n");
+        freeaddrinfo(result);
+        return EXIT_FAILURE;
+    }
+
     freeaddrinfo(result);
 
     ssize_t bytes_read = 0;
     unsigned char buffer[4096];
-    while((bytes_read = read(sfd, buffer, sizeof(buffer))) > 0)
+    while ((bytes_read = read(sfd, buffer, sizeof buffer)) > 0)
     {
         write(STDOUT_FILENO, buffer, bytes_read);
+    }
+
+    if (bytes_read == -1)
+    {
+        perror("read");
+        close(sfd);
+        return EXIT_FAILURE;
     }
 
     close(sfd);
