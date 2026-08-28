@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 
         if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
         {
+            printf("Connected using: %s\n", rp->ai_family == AF_INET ? "IPv4" : "IPv6");
             break;
         }
 
