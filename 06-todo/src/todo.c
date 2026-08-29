@@ -101,7 +101,7 @@ int todo_complete(unsigned long id)
 			fprintf(stderr, "Failed to parse record: %s\n", line);
 			fclose(file);
 			fclose(tmp);
-			
+			remove(TODO_TEMP_FILE);
 			return -1;
 		}
 		
@@ -114,12 +114,24 @@ int todo_complete(unsigned long id)
 		if(todo_write(tmp, &todo) != 0)
 		{
 			fprintf(stderr, "Failed to write record: %lu", id);
+			fclose(file);
+			fclose(tmp);
+			remove(TODO_TEMP_FILE);
 			return -1;
 		}
 	}
 	
-	fclose(file);
-	fclose(tmp);
+	if(fclose(file) != 0)
+	{
+		perror("fclose");
+		return -1;
+	}
+	
+	if(fclose(tmp) != 0)
+	{
+		perror("fclose");
+		return -1;
+	}
 	
 	if(found)
 	{
