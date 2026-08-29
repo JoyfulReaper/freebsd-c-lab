@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "todo.h"
 
 #define TODO_FILE "todos.txt"
@@ -70,6 +71,13 @@ int todo_list(void)
 			todo.id, todo.title, todo.description, todo.completed ? "true" : "false");
 	}
 	
+	if (ferror(file))
+	{
+		perror("fgets");
+		fclose(file);
+		return -1;
+	}
+	
 	if(fclose(file) != 0)
 	{
 		perror("fclose");
@@ -79,7 +87,7 @@ int todo_list(void)
 	return 0;
 }
 
-int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed)
+static int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed)
 {
 	FILE *file = fopen(TODO_FILE, "r");
 	if(file == NULL)
@@ -134,15 +142,27 @@ int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed
 		}
 	}
 	
+	if (ferror(file))
+	{
+		perror("fgets");
+		fclose(file);
+		fclose(tmp);
+		remove(TODO_TEMP_FILE);
+		return -1;
+	}
+	
 	if(fclose(file) != 0)
 	{
 		perror("fclose");
+		fclose(tmp);
+		remove(TODO_TEMP_FILE);
 		return -1;
 	}
 	
 	if(fclose(tmp) != 0)
 	{
 		perror("fclose");
+		remove(TODO_TEMP_FILE);
 		return -1;
 	}
 	
@@ -151,6 +171,7 @@ int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed
 		if(rename(TODO_TEMP_FILE, TODO_FILE) != 0)
 		{
 			perror("rename");
+			remove(TODO_TEMP_FILE);
 			return -1;
 		}
 	} else {
@@ -221,7 +242,11 @@ static unsigned long todo_next_id(void)
 	struct stat buffer;
 	if(stat(TODO_FILE, &buffer) != 0)
 	{
-		return 1;
+		if(errno == ENOENT)
+			return 1;
+			
+		perror("stat");
+		return 0;
 	}
 	
 	FILE *file = fopen(TODO_FILE, "r");
@@ -235,9 +260,22 @@ static unsigned long todo_next_id(void)
 	while(fgets(line, sizeof line, file) != NULL)
 	{
 		char *token = strtok(line, "|");
+		if(token == NULL)
+		{
+			fprintf(stderr, "Failed to parse line: %s", line);
+			continue;
+		}
+		
 		unsigned long current_id = strtoul(token, NULL, 10);
 		if(current_id > max_id)
 			max_id = current_id;
+	}
+	
+	if (ferror(file))
+	{
+		perror("fgets");
+		fclose(file);
+		return 0;
 	}
 	
 	if(fclose(file) != 0)
