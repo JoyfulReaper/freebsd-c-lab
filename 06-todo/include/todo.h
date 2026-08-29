@@ -14,6 +14,4 @@ struct todo {
 int todo_add(const struct todo *todo);
 int todo_list(void);
 
-static unsigned long todo_next_id(void);
-
 #endif

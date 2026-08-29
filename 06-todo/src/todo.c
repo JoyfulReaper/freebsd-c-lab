@@ -7,6 +7,8 @@
 
 #define TODO_FILE "todos.txt"
 
+static unsigned long todo_next_id(void);
+
 int todo_add(const struct todo *todo)
 {
 	FILE *file = fopen(TODO_FILE, "a");
@@ -15,6 +17,10 @@ int todo_add(const struct todo *todo)
 		perror("fopen");
 		return -1;
 	}
+	
+	unsigned long id = todo_next_id();
+	if(id == 0)
+		return -1;
 	
 	if(fprintf(
 		file,
@@ -91,7 +97,7 @@ static unsigned long todo_next_id(void)
 	if(file == NULL)
 	{
 		perror("fopen");
-		return -1;
+		return 0;
 	}
 	
 	char line[1024];
@@ -106,7 +112,7 @@ static unsigned long todo_next_id(void)
 	if(fclose(file) != 0)
 	{
 		perror("fclose");
-		return -1;
+		return 0;
 	}
 	
 	return max_id + 1;
