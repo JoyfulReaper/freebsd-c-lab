@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		};
 		
 		if(todo_add(&todo) != 0) {
-			fprintf(stderr, "Failed to add todo!");
+			fprintf(stderr, "Failed to add todo!\n");
 			return EXIT_FAILURE;
 		}
 		else
@@ -58,7 +58,28 @@ int main(int argc, char *argv[])
 		}
 		
 		if(todo_list() != 0) {
-			fprintf(stderr, "Failed to list todos!");
+			fprintf(stderr, "Failed to list todos!\n");
+			return EXIT_FAILURE;
+		}
+	}
+	else if(strcmp(argv[1], "complete") == 0)
+	{
+		if(argc != 3)
+		{
+			print_usage(argv[0]);
+			return EXIT_FAILURE;
+		}
+		
+		unsigned long id = strtoul(argv[2], NULL, 10);
+		if(id == 0)
+		{
+			fprintf(stderr, "Failed to parse id\n");
+			return EXIT_FAILURE;
+		}
+		
+		if(todo_complete(id) == 0)
+		{
+			fprintf(stderr, "Failed to complete todo\n");
 			return EXIT_FAILURE;
 		}
 	}

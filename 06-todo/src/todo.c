@@ -75,6 +75,11 @@ int todo_list(void)
 	return 0;
 }
 
+int todo_complete(unsigned long id)
+{
+	return 0;
+}
+
 static int todo_parse(char *line, struct todo *todo)
 {
 		line[strcspn(line, "\n")] = '\0';

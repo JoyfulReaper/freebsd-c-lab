@@ -13,5 +13,6 @@ struct todo {
 
 int todo_add(const struct todo *todo);
 int todo_list(void);
+int todo_complete(unsigned long id);
 
 #endif
