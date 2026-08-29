@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "todo.h"
 
 #define TODO_FILE "todos.txt"
@@ -18,7 +19,7 @@ int todo_add(const struct todo *todo)
 	if(fprintf(
 		file,
 		"%lu|%d|%s|%s\n",
-		todo->id,
+		todo_next_id(),
 		todo->completed ? 1 : 0,
 		todo->title,
 		todo->description) < 0) {
@@ -67,5 +68,46 @@ int todo_list(void)
 			todo.id, todo.title, todo.description, todo.completed ? "true" : "false");
 	}
 	
+	if(fclose(file) != 0)
+	{
+		perror("fclose");
+		return -1;
+	}
+	
 	return 0;
+}
+
+static unsigned long todo_next_id(void)
+{
+	unsigned long max_id = 0;
+	
+	struct stat buffer;
+	if(stat(TODO_FILE, &buffer) != 0)
+	{
+		return 1;
+	}
+	
+	FILE *file = fopen(TODO_FILE, "r");
+	if(file == NULL)
+	{
+		perror("fopen");
+		return -1;
+	}
+	
+	char line[1024];
+	while(fgets(line, sizeof line, file) != NULL)
+	{
+		char *token = strtok(line, "|");
+		unsigned long current_id = strtoul(token, NULL, 10);
+		if(current_id > max_id)
+			max_id = current_id;
+	}
+	
+	if(fclose(file) != 0)
+	{
+		perror("fclose");
+		return -1;
+	}
+	
+	return max_id + 1;
 }
