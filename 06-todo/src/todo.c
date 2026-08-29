@@ -8,9 +8,15 @@
 #define TODO_FILE "todos.txt"
 #define TODO_TEMP_FILE "todos.tmp"
 
+enum todo_operation {
+    TODO_DELETE,
+    TODO_SET_COMPLETED
+};
+
 static unsigned long todo_next_id(void);
 static int todo_parse(char *line, struct todo *todo);
 static int todo_write(FILE *file, const struct todo *todo);
+static int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed);
 
 int todo_add(struct todo *todo)
 {
@@ -73,7 +79,7 @@ int todo_list(void)
 	return 0;
 }
 
-int todo_complete(unsigned long id, bool completed)
+int todo_rewrite(unsigned long id, enum todo_operation operation, bool completed)
 {
 	FILE *file = fopen(TODO_FILE, "r");
 	if(file == NULL)
@@ -107,8 +113,15 @@ int todo_complete(unsigned long id, bool completed)
 		
 		if(todo.id == id)
 		{
-			todo.completed = completed;
 			found = true;
+			
+			if(operation == TODO_DELETE)
+				continue;
+				
+			if(operation == TODO_SET_COMPLETED)
+			{
+				todo.completed = completed;
+			}
 		}
 		
 		if(todo_write(tmp, &todo) != 0)
@@ -146,6 +159,16 @@ int todo_complete(unsigned long id, bool completed)
 	}
 	
 	return 0;
+}
+
+int todo_delete(unsigned long id)
+{
+	return todo_rewrite(id, TODO_DELETE, false);
+}
+
+int todo_complete(unsigned long id, bool completed)
+{
+	return todo_rewrite(id, TODO_SET_COMPLETED, completed);
 }
 
 

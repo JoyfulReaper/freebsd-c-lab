@@ -14,5 +14,6 @@ struct todo {
 int todo_add(struct todo *todo);
 int todo_list(void);
 int todo_complete(unsigned long id, bool completed);
+int todo_delete(unsigned long id);
 
 #endif

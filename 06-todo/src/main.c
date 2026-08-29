@@ -10,6 +10,7 @@ static void print_usage(const char *program)
 	fprintf(stderr, "%s list\n", program);
 	fprintf(stderr, "%s complete <id>\n", program);
 	fprintf(stderr, "%s uncomplete <id>\n", program);
+	fprintf(stderr, "%s delete <id>\n", program);
 }
 
 int main(int argc, char *argv[])
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
 	if(strcmp(argv[1], "add") != 0 &&
 	   strcmp(argv[1], "list") != 0 &&
 	   strcmp(argv[1], "complete") != 0 &&
-	   strcmp(argv[1], "uncomplete") != 0) 
+	   strcmp(argv[1], "uncomplete") != 0 &&
+	   strcmp(argv[1], "delete") != 0) 
 	{
 		print_usage(argv[0]);
 		return EXIT_FAILURE;
@@ -106,9 +108,33 @@ int main(int argc, char *argv[])
 		if(todo_complete(id, false) != 0)
 		{
 			fprintf(stderr, "Failed to uncomplete todo\n");
+			return EXIT_FAILURE;
 		}
 		
 		printf("Uncompleted todo!\n");
+	}
+	else if (strcmp(argv[1], "delete") == 0)
+	{
+		if(argc != 3)
+		{
+			print_usage(argv[0]);
+			return EXIT_FAILURE;
+		}
+		
+		unsigned long id = strtoul(argv[2], NULL, 10);
+		if(id == 0)
+		{
+			fprintf(stderr, "Failed to parse id\n");
+			return EXIT_FAILURE;
+		}
+		
+		if(todo_delete(id) != 0)
+		{
+			fprintf(stderr, "Failed to delete todo!\n");
+			return EXIT_FAILURE;
+		}
+		
+		printf("Deleted todo!\n");
 	}
 	else
 	{
