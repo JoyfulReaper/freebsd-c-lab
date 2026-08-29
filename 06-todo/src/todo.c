@@ -10,9 +10,16 @@
 
 static unsigned long todo_next_id(void);
 static int todo_parse(char *line, struct todo *todo);
+static int todo_write(FILE *file, const struct todo *todo);
 
-int todo_add(const struct todo *todo)
+int todo_add(struct todo *todo)
 {
+	unsigned long id = todo_next_id();
+	if(id == 0)
+		return -1;
+	else
+		todo->id = id;
+	
 	FILE *file = fopen(TODO_FILE, "a");
 	if (file == NULL)
 	{
@@ -20,21 +27,7 @@ int todo_add(const struct todo *todo)
 		return -1;
 	}
 	
-	unsigned long id = todo_next_id();
-	if(id == 0)
-		return -1;
-	
-	if(fprintf(
-		file,
-		"%lu|%d|%s|%s\n",
-		id,
-		todo->completed ? 1 : 0,
-		todo->title,
-		todo->description) < 0) {
-			perror("fprintf");
-			fclose(file);
-			return -1;
-		}
+	todo_write(file, todo);
 		
 	if (fclose(file) != 0) {
 		perror("fclose");
@@ -60,6 +53,7 @@ int todo_list(void)
 		if(todo_parse(line, &todo) != 0)
 		{
 			fprintf(stderr, "Failed to parse record: %s\n", line);
+			continue;
 		}
 		
 		printf("Id: %lu Title: %s Desc: %s Completed: %s\n",
@@ -77,6 +71,24 @@ int todo_list(void)
 
 int todo_complete(unsigned long id)
 {
+	return 0;
+}
+
+static int todo_write(FILE *file, const struct todo *todo)
+{
+	if(fprintf(
+		file,
+		"%lu|%d|%s|%s\n",
+		todo->id,
+		todo->completed ? 1 : 0,
+		todo->title,
+		todo->description) < 0) 
+		{
+			perror("fprintf");
+			fclose(file);
+			return -1;
+		}
+		
 	return 0;
 }
 
