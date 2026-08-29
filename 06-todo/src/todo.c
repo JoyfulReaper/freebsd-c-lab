@@ -73,7 +73,7 @@ int todo_list(void)
 	return 0;
 }
 
-int todo_complete(unsigned long id)
+int todo_complete(unsigned long id, bool completed)
 {
 	FILE *file = fopen(TODO_FILE, "r");
 	if(file == NULL)
@@ -107,7 +107,7 @@ int todo_complete(unsigned long id)
 		
 		if(todo.id == id)
 		{
-			todo.completed = true;
+			todo.completed = completed;
 			found = true;
 		}
 		
@@ -147,6 +147,7 @@ int todo_complete(unsigned long id)
 	
 	return 0;
 }
+
 
 static int todo_write(FILE *file, const struct todo *todo)
 {
