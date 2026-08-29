@@ -6,7 +6,7 @@
 #include "todo.h"
 
 #define TODO_FILE "todos.txt"
-#define TODO_TEMP_FILE = "todos.tmp";
+#define TODO_TEMP_FILE "todos.tmp"
 
 static unsigned long todo_next_id(void);
 static int todo_parse(char *line, struct todo *todo);
@@ -27,7 +27,7 @@ int todo_add(const struct todo *todo)
 	if(fprintf(
 		file,
 		"%lu|%d|%s|%s\n",
-		todo_next_id(),
+		id,
 		todo->completed ? 1 : 0,
 		todo->title,
 		todo->description) < 0) {
@@ -89,6 +89,12 @@ static int todo_parse(char *line, struct todo *todo)
 		for(int i = 1; i < 4; i++)
 		{
 			tokens[i] = strtok(NULL, "|");
+		}
+		
+		for(int i = 0; i<4; i++)
+		{
+			if(tokens[i] == NULL)
+				return -1;
 		}
 		
 		todo->id = strtoul(tokens[0], NULL, 10);
