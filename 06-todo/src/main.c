@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 		
-		if(todo_complete(id) == 0)
+		if(todo_complete(id) != 0)
 		{
 			fprintf(stderr, "Failed to complete todo\n");
 			return EXIT_FAILURE;

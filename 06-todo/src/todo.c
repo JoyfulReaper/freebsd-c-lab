@@ -27,7 +27,11 @@ int todo_add(struct todo *todo)
 		return -1;
 	}
 	
-	todo_write(file, todo);
+	if(todo_write(file, todo) != 0)
+	{
+		fclose(file);
+		return -1;
+	}
 		
 	if (fclose(file) != 0) {
 		perror("fclose");
@@ -71,6 +75,64 @@ int todo_list(void)
 
 int todo_complete(unsigned long id)
 {
+	FILE *file = fopen(TODO_FILE, "r");
+	if(file == NULL)
+	{
+		perror("fopen");
+		return -1;
+	}
+	
+	FILE *tmp = fopen(TODO_TEMP_FILE, "w");
+	if(tmp == NULL)
+	{
+		perror("fopen");
+		fclose(file);
+		return -1;
+	}
+
+	bool found = false;
+	
+	char line[1024];
+	while (fgets(line, sizeof line, file) != NULL)
+	{
+		struct todo todo = {0};
+		if(todo_parse(line, &todo) != 0)
+		{
+			fprintf(stderr, "Failed to parse record: %s\n", line);
+			fclose(file);
+			fclose(tmp);
+			
+			return -1;
+		}
+		
+		if(todo.id == id)
+		{
+			todo.completed = true;
+			found = true;
+		}
+		
+		if(todo_write(tmp, &todo) != 0)
+		{
+			fprintf(stderr, "Failed to write record: %lu", id);
+			return -1;
+		}
+	}
+	
+	fclose(file);
+	fclose(tmp);
+	
+	if(found)
+	{
+		if(rename(TODO_TEMP_FILE, TODO_FILE) != 0)
+		{
+			perror("rename");
+			return -1;
+		}
+	} else {
+		remove(TODO_TEMP_FILE);
+		return -1;
+	}
+	
 	return 0;
 }
 
@@ -85,7 +147,6 @@ static int todo_write(FILE *file, const struct todo *todo)
 		todo->description) < 0) 
 		{
 			perror("fprintf");
-			fclose(file);
 			return -1;
 		}
 		
