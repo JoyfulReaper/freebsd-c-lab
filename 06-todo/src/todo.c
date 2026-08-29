@@ -6,8 +6,10 @@
 #include "todo.h"
 
 #define TODO_FILE "todos.txt"
+#define TODO_TEMP_FILE = "todos.tmp";
 
 static unsigned long todo_next_id(void);
+static int todo_parse(char *line, struct todo *todo);
 
 int todo_add(const struct todo *todo)
 {
@@ -54,21 +56,11 @@ int todo_list(void)
 	char line[1024];
 	while (fgets(line, sizeof line, file) != NULL)
 	{
-		line[strcspn(line, "\n")] = '\0';
-		char *tokens[4];
-		
-		tokens[0] = strtok(line, "|");
-		for(int i = 1; i < 4; i++)
+		struct todo todo = {0};
+		if(todo_parse(line, &todo) != 0)
 		{
-			tokens[i] = strtok(NULL, "|");
+			fprintf(stderr, "Failed to parse record: %s\n", line);
 		}
-		
-		struct todo todo = {
-			.id = strtoul(tokens[0], NULL, 10),
-			.completed = strtoul(tokens[1], NULL, 10) != 0,
-			.title = tokens[2],
-			.description = tokens[3]
-		};
 		
 		printf("Id: %lu Title: %s Desc: %s Completed: %s\n",
 			todo.id, todo.title, todo.description, todo.completed ? "true" : "false");
@@ -81,6 +73,25 @@ int todo_list(void)
 	}
 	
 	return 0;
+}
+
+static int todo_parse(char *line, struct todo *todo)
+{
+		line[strcspn(line, "\n")] = '\0';
+		char *tokens[4];
+		
+		tokens[0] = strtok(line, "|");
+		for(int i = 1; i < 4; i++)
+		{
+			tokens[i] = strtok(NULL, "|");
+		}
+		
+		todo->id = strtoul(tokens[0], NULL, 10);
+		todo->title = tokens[2];
+		todo->description = tokens[3];
+		todo->completed = strtoul(tokens[1], NULL, 10) != 0;
+		
+		return 0;
 }
 
 static unsigned long todo_next_id(void)

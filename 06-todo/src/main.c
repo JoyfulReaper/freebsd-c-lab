@@ -8,6 +8,7 @@ static void print_usage(const char *program)
 {
 	fprintf(stderr, "Usage:\n%s add <title> <description>\n", program);
 	fprintf(stderr, "%s list\n", program);
+	fprintf(stderr, "%s complete <id>\n", program);
 }
 
 int main(int argc, char *argv[])
@@ -19,7 +20,8 @@ int main(int argc, char *argv[])
 	}
 	
 	if(strcmp(argv[1], "add") != 0 &&
-	   strcmp(argv[1], "list") != 0) {
+	   strcmp(argv[1], "list") != 0 &&
+	   strcmp(argv[1], "complete") != 0) {
 		print_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
