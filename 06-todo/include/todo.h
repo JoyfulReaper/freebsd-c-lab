@@ -12,5 +12,6 @@ struct todo {
 
 
 int todo_add(const struct todo *todo);
+int todo_list(void);
 
 #endif
