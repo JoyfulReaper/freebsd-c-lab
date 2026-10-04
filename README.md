@@ -4,37 +4,15 @@ A collection of small C programs and experiments written while learning C and wo
 
 This is a **lab repo**, not one polished application. The earlier directories are deliberately small exercises, and the later ones start turning those pieces into more interesting programs involving sockets, IPv4/IPv6, `poll()`, signals, file I/O, and other Unix-y things.
 
-## Start here: tcpnoise
+## tcpnoise graduated
 
-If you're just browsing the repo, **[`07-tcpnoise`](./07-tcpnoise) is the most interesting thing here right now.**
+`tcpnoise` started here as exercise 07, but grew into a real project with SQLite persistence, NATS integration, Windows and Android companion apps, and multi-sensor deployments.
 
-`tcpnoise` is a small TCP network-noise monitor: point some otherwise-unused TCP ports at the public Internet and watch scanners, bots, probes, and other random garbage find them.
+It now lives in its own repository:
 
-It currently includes:
+https://github.com/JoyfulReaper/tcpnoise
 
-* multiple TCP ports at once
-* separate IPv4 and IPv6 listeners
-* `poll()`-based listener handling
-* remote IP and source-port reporting
-* per-IP seen counts
-* per-port connection counts
-* initial payload capture and escaped binary output
-* per-port log files
-* optional randomized response banners
-* banner send/result logging
-* graceful `SIGINT` / `SIGTERM` shutdown
-
-It's intentionally small and single-threaded. It is a learning project and network curiosity tool, not a hardened honeypot.
-
-Example:
-
-```sh
-cd 07-tcpnoise
-make
-./tcpnoise 2222 2323 8080
-```
-
-Then wait for the Internet to do what the Internet does.
+Its Git history was preserved when it was extracted from this lab.
 
 ## Projects
 
@@ -47,7 +25,7 @@ Then wait for the Internet to do what the Internet does.
 | [`04-listdir`](./04-listdir)       | Lists the current directory using `getcwd()`, `opendir()`, and `readdir()`.                                                                |
 | [`05-tcpclient`](./05-tcpclient)   | Small generic TCP client using `getaddrinfo()`, IPv4/IPv6, `connect()`, and `recv()`.                                                      |
 | [`06-todo`](./06-todo)             | Multi-file command-line todo application supporting add, list, complete, uncomplete, and delete operations.                                |
-| **[`07-tcpnoise`](./07-tcpnoise)** | **The main attraction for now:** TCP network-noise monitor with IPv4/IPv6, multiple ports, logging, payload capture, and optional banners. |
+| [`tcpnoise`](https://github.com/JoyfulReaper/tcpnoise) | Started here as exercise 07, then outgrew the lab and moved to its own repository with history preserved. |
 | [`08-bannergrab`](./08-bannergrab) | Work in progress. Currently handles and validates `<host> <port>` command-line arguments; networking comes next.                           |
 | [`demos`](./demos)                 | Tiny throwaway examples used while learning individual C concepts.                                                                         |
 
@@ -61,10 +39,10 @@ The simple programs can generally be compiled directly with `cc`, for example:
 cc -Wall -Wextra -Wpedantic 01-bytecount/bytecount.c -o bytecount
 ```
 
-Larger exercises such as `06-todo` and `07-tcpnoise` have their own Makefiles:
+The `06-todo` exercise has its own Makefile:
 
 ```sh
-cd 07-tcpnoise
+cd 06-todo
 make
 ```
 
